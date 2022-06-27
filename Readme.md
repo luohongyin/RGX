@@ -107,6 +107,19 @@ python rgx_doc.py \
 
 The generated files will be stored at `data_gen/{$NEW_DATASET_NAME}/`.
 
+# Fine-tuning QA Models with Synthetic Data
+we suggest two approaches for QA fine-tuning with the generated QA pairs.
+- Secondary pretraining: Fine-tuning the QA model on the synthetic corpus, and fine-tune on SQuAD. The model can be evaluated on different domains.
+- Model mixing: Fine-tune two models on the generated corpus and SQuAD, and average all weights of the two models using the `mix_mode.py` script with
+```
+python mix_model.py $MIX_RATE $SQUAD_MODEL_PATH $RGX_MODEL_PATH
+```
+for example,
+```
+python mix_model.py 0.5 model_ft_file/ext_sq.pt model_ft_file/ext_rgx.pt
+```
+The output model will be stored as `model_ft_file/ext_mixed.pt`.
+
 # Contact and Citation
 
 Please contact the first author, Hongyin Luo (hyluo at mit dot edu) if there is any questions. If our system is applied in your work, please cite our paper

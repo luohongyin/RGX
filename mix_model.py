@@ -22,8 +22,9 @@ def mix(sq_model, tgt_model, mix_rate):
     return sq_model
 
 if __name__ == '__main__':
-    domain = sys.argv[1]
-    mix_rate = float(sys.argv[2])
+    mix_rate = float(sys.argv[0])
+    squad_model_path = sys.argv[1]
+    rgx_model_path = sys.argv[2]
     '''sq_model = BartForConditionalGeneration.from_pretrained(
         'model_file/ques_gen_squad.pt'
     )
@@ -33,11 +34,11 @@ if __name__ == '__main__':
     )'''
 
     sq_model = ElectraForQuestionAnswering.from_pretrained(
-        'model_file/ext_sq.pt'
+        squad_model_path
     )
 
     target_model = ElectraForQuestionAnswering.from_pretrained(
-        'coop_model_file/ext_lr_4e-5_rgx_hard.pt'
+        rgx_model_path
     )
 
     sq_state_dict = sq_model.state_dict()
