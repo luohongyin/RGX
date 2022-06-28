@@ -1,37 +1,134 @@
-## Welcome to GitHub Pages
+# RGX: question-answer generation for documents
 
-You can use the [editor on GitHub](https://github.com/luohongyin/RGX/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
+This repo contains the software developed for the paper,
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Cooperative Self-training for Machine Reading Comprehension, Luo H., Li S.-W., Gao M., Yu S., Glass J., NAACL 2022.
 
-### Markdown
+# Dependency
+We run this software using the following packages,
+- Python 3.8.13
+- NLTK 3.7
+- Stanza 1.4.0
+- PyTorch 1.11.0 + cu113
+- Transformers 4.19.2
+- Datasets 2.3.2
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+The pretrained models are available via this [Google Drive Link](https://drive.google.com/drive/folders/1pREUVN9FSL6RwamhkQBDb5_3oED3Qjlq?usp=sharing). Please download the models and move them under the `model_file/` directory.
+- `model_file/ext_sqv2.pt`: Pretrained ELECTRA-large question answering model on SQuAD v2.0.
+- `model_file/ques_gen_squad.pt`: Pretrained BART-large question generation model on SQuAD v2.0.
+- `model_file/electra-tokenize.pt`: Electra-large tokenizer provided by Huggingface.
+- `model_file/bart-tokenizer.pt`: BART-large tokenizer provided by Huggingface.
 
-```markdown
-Syntax highlighted code block
+# Quick (?) Start
+Generate question-answer pairs on the example SQuAD passages we provide at `data/squad/doc_data_0.json` by running the following command,
 
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+```
+python rgx_doc.py \
+    --dataset_name squad \
+    --data_split 0 \
+    --output_dir tmp/rgx \
+    --version_2_with_negative
 ```
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+The generated data will be stored under `data_gen/squad`, including `rgx_0.json` and `qa_train_corpus_0.json`. We provide the `$DATA_SPLIT` option for distributed data generation, for example, with Slurm. If only generating QA pairs with one process, simply use `--data_split 0`.
 
-### Jekyll Themes
+## Data & File Locations
+All data are stored at the `data/` and `data_gen/` directories.
+- `data/{$DATASET_NAME}/doc_data_{$DATA_SPLIT}.json`: unlabeled documents of the target dataset.
+- `data_gen/{$DATASET_NAME}/rgx_{$DATA_SPLIT}.json`: generated QA data aligned with each document from the corresponding dataset.
+- `data_gen/{$DATASET_NAME}/qa_train_corpus_{$DATA_SPLIT}.json`: generated QA training set of the given dataset. The training examples follows the SQuAD data format and are randomly shuffled.
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/luohongyin/RGX/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+## Data Format
+- The format of the input file, `doc_data_{$DATA_SPLIT}.json` is a list of dictionaries as
+```
+[
+    {"context": INPUT_DOC_TXT__0},
+    {"context": INPUT_DOC_TXT__1},
+    ...,
+    {"context": INPUT_DOC_TXT__N},
+]
+```
+- The format of the output file, `qa_train_corpus_{$DATA_SPLIT}.json`, is a list of dictionaries as
+```
+[
+    {
+        "context": INPUT_DOC_TXT_0,
+        "question": GEN_QUESTION_TXT_0,
+        "answers": {
+            "text": [ ANSWER_TXT ], # only one answer per question
+            "answer_start": [ ANSWER_ST_CHAR ]
+            # index of the starting character of the answer txt
+        }
+    },
+    {
+        ...
+    },
+]
+```
+- The format of the output file, `rgx_{$DATA_SPLIT}.json` is a list of document-QA mappings,
+```
+[
+    [
+        $DOCUMENT_i,
+        $ANS2ITEM_LIST_i,
+        $GEN_QA_LIST_i
+    ],
+    ...
+]
+```
+`$DOCUMENT_i` has the same format as the input file.  The `$ANS2ITEM_LIST_i` is the meta-data of all recognized answers and generated questions. Note that one answer can have multiple questions, and the questions can be either correct or not. The final output of the model is `$GEN_QA_LIST_i`, which is a list of dictionaries of generated QA pairs based on the input document,
+```
+[
+    {
+        "question": GEN_QUESTION_TXT_0,
+        "answers": {
+            "text": [ ANSWER_TXT ],
+            "answer_start": [ ANSWER_ST_CHAR ]
+        }
+    }
+]
+```
 
-### Support or Contact
+# QA Generation for Your Documents
+- Run the following command, or manually create directories under the `data/` and `data_gen/` directories,
+```
+bash new_dataset.sh $NEW_DATASET_NAME
+```
+- Move the input file containing the target documents as `data/$NEW_DATASET_NAME/doc_data_0.json`. The format is described in the previous section.
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+- Run the following command
+```
+python rgx_doc.py \
+    --dataset_name $NEW_DATASET_NAME \
+    --data_split 0 \
+    --output_dir tmp/rgx \
+    --version_2_with_negative
+```
+
+The generated files will be stored at `data_gen/{$NEW_DATASET_NAME}/`.
+
+# Fine-tuning QA Models with Synthetic Data
+we suggest two approaches for QA fine-tuning with the generated QA pairs.
+- Secondary pretraining: Fine-tuning the QA model on the synthetic corpus, and fine-tune on SQuAD. The model can be evaluated on different domains.
+- Model mixing: Fine-tune two models on the generated corpus and SQuAD, and average all weights of the two models using the `mix_mode.py` script with
+```
+python mix_model.py $MIX_RATE $SQUAD_MODEL_PATH $RGX_MODEL_PATH
+```
+for example,
+```
+python mix_model.py 0.5 model_ft_file/ext_sq.pt model_ft_file/ext_rgx.pt
+```
+The output model will be stored as `model_ft_file/ext_mixed.pt`.
+
+# Contact and Citation
+
+Please contact the first author, Hongyin Luo (hyluo at mit dot edu) if there are any questions. If our system is applied in your work, please cite our paper
+
+```
+@article{luo2021cooperative,
+  title={Cooperative self-training machine reading comprehension},
+  author={Luo, Hongyin and Li, Shang-Wen and Mingye Gao, and Yu, Seunghak and Glass, James},
+  journal={arXiv preprint arXiv:2103.07449},
+  year={2021}
+}
+```
