@@ -558,11 +558,20 @@ if __name__ == '__main__':
         'model_file/ques_gen_squad.pt',
         'model_file/ext_sqv2.pt'
     )
-    nlp_pipeline = stanza.Pipeline(
-        'en',
-        processors='tokenize,pos,lemma,depparse',
-        download_method=DownloadMethod.REUSE_RESOURCES
-    )
+    
+    try:
+        nlp_pipeline = stanza.Pipeline(
+            'en',
+            processors='tokenize,pos,lemma,depparse',
+            download_method=DownloadMethod.REUSE_RESOURCES
+        )
+    except:
+        stanza.download('en', processors='tokenize,pos,lemma,depparse')
+        nlp_pipeline = stanza.Pipeline(
+            'en',
+            processors='tokenize,pos,lemma,depparse',
+            download_method=DownloadMethod.REUSE_RESOURCES
+        )
 
     print(f'Self-playing on the {data_args.dataset_name} dataset.')
 
