@@ -176,7 +176,7 @@ def aer(dataset, nlp_pipeline, tok, nbest=None, eval_data=None, verbose=True):
                 context,
                 x, tok,
                 pred_answers, j,
-                squad['question']
+                squad['question'] if 'question' in squad else None
             ) for j, x in enumerate(doc.sentences)
         ]
         squad_aer_list += sent_aer_list
