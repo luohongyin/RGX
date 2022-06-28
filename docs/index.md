@@ -2,7 +2,7 @@
 
 This repo contains the software developed for the paper,
 
-Cooperative Self-training for Machine Reading Comprehension, Luo H., Li S.-W., Gao M., Yu S., Glass J., NAACL 2022.
+Cooperative Self-training for Machine Reading Comprehension, Hongyin Luo, Shang-Wen Li, Mingye Gao, Seunghak Yu, and James Glass. NAACL 2022.
 
 # Dependency
 We run this software using the following packages,
