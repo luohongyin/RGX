@@ -122,7 +122,7 @@ The output model will be stored as `model_ft_file/ext_mixed.pt`.
 
 # Contact and Citation
 
-Please contact the first author, Hongyin Luo (hyluo at mit dot edu) if there is any questions. If our system is applied in your work, please cite our paper
+Please contact the first author, Hongyin Luo (hyluo at mit dot edu) if there are any questions. If our system is applied in your work, please cite our paper
 
 ```
 @article{luo2021cooperative,
