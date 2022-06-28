@@ -76,7 +76,7 @@ All data are stored at the `data/` and `data_gen/` directories.
     ...
 ]
 ```
-`$DOCUMENT_i` has the save format in the input file.  The `$ANS2ITEM_LIST_i` is the meta-data of recognized answers and all generated questions. Note that one answer can have multiple questions, and the questions can be either correct or not. The final output of the model is `$GEN_QA_LIST_i`, which is a list of dictionaries of generated QA pairs based on the input document,
+`$DOCUMENT_i` has the same format as the input file.  The `$ANS2ITEM_LIST_i` is the meta-data of all recognized answers and generated questions. Note that one answer can have multiple questions, and the questions can be either correct or not. The final output of the model is `$GEN_QA_LIST_i`, which is a list of dictionaries of generated QA pairs based on the input document,
 ```
 [
     {
