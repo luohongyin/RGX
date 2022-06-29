@@ -17,7 +17,8 @@ from transformers import (
     BartForConditionalGeneration,
     ElectraTokenizerFast,
     ElectraForQuestionAnswering,
-    logging
+    AutoModelForQuestionAnswering,
+    logging,
 )
 
 from search_coop_recursive_trainer import search_qa
@@ -83,11 +84,25 @@ def ans_loc(ans_info, sent_enc, sent_offsets, tok):
 
 
 def load_model(qg_path, qa_path):
-    tok = BartTokenizerFast.from_pretrained('model_file/bart-tokenizer.pt')
-    model = BartForConditionalGeneration.from_pretrained(qg_path)
+    try:
+        tok = BartTokenizerFast.from_pretrained(
+            'facebook/bart-large'
+        )
+        model = BartForConditionalGeneration.from_pretrained(
+            'luohy/rgx-qg'
+        )
+        ext_tok = ElectraTokenizerFast.from_pretrained(
+            'google/electra-large-discriminator'
+        )
+        ext_model = AutoModelForQuestionAnswering.from_pretrained(
+            'luohy/rgx-qa-v2'
+        )
+    except:
+        tok = BartTokenizerFast.from_pretrained('model_file/bart-tokenizer.pt')
+        model = BartForConditionalGeneration.from_pretrained(qg_path)
 
-    ext_tok = ElectraTokenizerFast.from_pretrained("model_file/electra-tokenizer.pt")
-    ext_model = ElectraForQuestionAnswering.from_pretrained(qa_path, return_dict=True)
+        ext_tok = ElectraTokenizerFast.from_pretrained("model_file/electra-tokenizer.pt")
+        ext_model = ElectraForQuestionAnswering.from_pretrained(qa_path, return_dict=True)
 
     return tok, model, ext_tok, ext_model
 
