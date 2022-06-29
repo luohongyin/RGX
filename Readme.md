@@ -15,7 +15,7 @@ We run this software using the following packages,
 - Transformers 4.19.2
 - Datasets 2.3.2
 
-The pretrained models are available via this [Google Drive Link](https://drive.google.com/drive/folders/1pREUVN9FSL6RwamhkQBDb5_3oED3Qjlq?usp=sharing). Please download the models and move them under the `model_file/` directory.
+The pretrained models are available via this [Google Drive Link](https://drive.google.com/drive/folders/1pREUVN9FSL6RwamhkQBDb5_3oED3Qjlq?usp=sharing). Please download the models and move them under the `model_file/` directory if your machine cannot download the models from the Huggingface hub.
 - `model_file/ext_sqv2.pt`: Pretrained ELECTRA-large question answering model on SQuAD v2.0.
 - `model_file/ques_gen_squad.pt`: Pretrained BART-large question generation model on SQuAD v2.0.
 - `model_file/electra-tokenize.pt`: Electra-large tokenizer provided by Huggingface.
