@@ -1,5 +1,7 @@
 # RGX: question-answer generation for documents
 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/cooperative-learning-of-zero-shot-machine/question-answering-on-mrqa-out-of-domain)](https://paperswithcode.com/sota/question-answering-on-mrqa-out-of-domain?p=cooperative-learning-of-zero-shot-machine)
+
 This repo contains the software developed for the paper,
 
 [Cooperative Self-training for Machine Reading Comprehension](https://arxiv.org/pdf/2103.07449.pdf), Luo H., Li S.-W., Gao M., Yu S., Glass J., NAACL 2022.
